@@ -8,10 +8,12 @@ datasource db {
 }
 
 model Room {
-    id           String   @id @default(uuid())
-    createdAt    DateTime @default(now())
-    updatedAt    DateTime @updatedAt
-    roomCreator  String
-    roomOccupant String?
-    roomToken    String   @unique
+    id               String   @id @default(uuid())
+    createdAt        DateTime @default(now())
+    updatedAt        DateTime @updatedAt
+    roomCreator      String?
+    roomCreatorName  String
+    roomOccupant     String?
+    roomOccupantName String?
+    roomToken        String   @unique
 }

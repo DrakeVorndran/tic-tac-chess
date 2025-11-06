@@ -1,16 +1,18 @@
 import prisma from "@/lib/prisma";
 import NewGameForm from "./form";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 export default async function NewGamePage() {
   async function handleCreateGame(creator: string) {
     "use server";
-    await prisma.room.create({
+    const room = await prisma.room.create({
       data: {
-        roomCreator: creator,
+        roomCreatorName: creator,
         roomToken: Math.random().toString(36).substring(2, 8),
       },
     });
+    redirect(`/lobby/${room.roomToken}`);
   }
   return (
     <div>

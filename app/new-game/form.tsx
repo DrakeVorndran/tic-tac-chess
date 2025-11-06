@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function NewGameForm({
   onCreate,
@@ -7,10 +7,18 @@ export default function NewGameForm({
   onCreate: (creator: string) => void;
 }) {
   const [creator, setCreator] = useState("");
+
+  useEffect(() => {
+    const storedName = localStorage.getItem("myName");
+    if (storedName) {
+      setCreator(storedName);
+    }
+  }, []);
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        localStorage.setItem("myName", creator);
         onCreate(creator);
       }}
     >

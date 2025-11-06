@@ -8,44 +8,44 @@ import {
   useChannel,
   useConnectionStateListener,
 } from "ably/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Room } from "@prisma/client";
+import AblyConnection from "./AblyConnection";
 
-export default function Game({ lobby }: { lobby: string }) {
+type GameProps = {
+  lobby_id: string;
+  room: Room;
+  updateRoom: (newData: Partial<Room>) => void;
+};
+
+export default function Game({ lobby_id, room, updateRoom }: GameProps) {
   const client = new Ably.Realtime({ authUrl: "/api" });
 
-  function AblyPubSub() {
-    const [messages, setMessages] = useState<Ably.Message[]>([]);
+  const [username, setUsername] = useState("");
 
-    useConnectionStateListener("connected", () => {
-      console.log("Connected to Ably!");
-    });
-
-    // Create a channel called 'get-started' and subscribe to all messages with the name 'first' using the useChannel hook
-    const { channel } = useChannel(lobby, "first", (message) => {
-      setMessages((previousMessages) => [...previousMessages, message]);
-    });
-
-    return (
-      // Publish a message with the name 'first' and the contents 'Here is my first message!' when the 'Publish' button is clicked
-      <div>
-        <button
-          onClick={() => {
-            channel.publish("first", "Here is my first message!");
-          }}
-        >
-          Publish
-        </button>
-        {messages.map((message) => {
-          return <p key={message.id}>{message.data}</p>;
-        })}
-      </div>
-    );
+  function onMessageReceived(message: Ably.Message) {
+    console.log("New message received:", message);
   }
+
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("myName");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
   return (
     <AblyProvider client={client}>
-      <ChannelProvider channelName={lobby}>
-        <AblyPubSub />
+      <ChannelProvider channelName={lobby_id}>
+        {username && (
+          <AblyConnection
+            lobby_id={lobby_id}
+            username={username}
+            room={room}
+            updateRoom={updateRoom}
+          />
+        )}
       </ChannelProvider>
     </AblyProvider>
   );
