@@ -9,6 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ably/chat": "^1.1.0",
+    "@ably/spaces": "^0.4.0",
+    "ably": "^2.14.0",
     "dns": "^0.2.2",
     "next": "16.0.1",
     "pg": "^8.16.3",
