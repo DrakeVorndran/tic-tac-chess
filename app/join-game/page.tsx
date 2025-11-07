@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import Form from "./Form";
+import FakeForm from "./FakeForm";
 export default async function JoinGamePage() {
   async function handleJoinRoom(username: string, roomId: string) {
     "use server";
@@ -24,7 +25,9 @@ export default async function JoinGamePage() {
   return (
     <div className={"flex flex-col gap-4 items-center"}>
       <h1 className={"text-2xl"}>Join Game</h1>
-      <Form onSubmit={handleJoinRoom} />
+      <Suspense fallback={<FakeForm />}>
+        <Form onSubmit={handleJoinRoom} />
+      </Suspense>
     </div>
   );
 }
