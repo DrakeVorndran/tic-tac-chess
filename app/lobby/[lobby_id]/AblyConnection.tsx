@@ -4,9 +4,9 @@ import { Room } from "@prisma/client";
 import * as Ably from "ably";
 import { useChannel, useConnectionStateListener } from "ably/react";
 import { use, useEffect, useState } from "react";
-import Board from "./Board";
-import { GameMessageType } from "./messageTypes";
-import { staticPieces } from "./StaticPieces";
+import Board from "../../../components/Board";
+import { GameMessageType } from "../../../components/messageTypes";
+import { staticPieces } from "../../../components/StaticPieces";
 import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
 
 type AblyConnectionProps = {

@@ -21,6 +21,13 @@ export default function Home() {
           >
             Join a friends lobby
           </Link>
+          <p>~ or ~</p>
+          <Link
+            className="bg-blue-500 hover:bg-blue-600 p-1 pl-2 pr-2 border rounded-md"
+            href="/sandbox"
+          >
+            play on one device
+          </Link>
         </div>
       </main>
     </div>

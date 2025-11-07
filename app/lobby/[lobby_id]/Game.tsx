@@ -1,7 +1,7 @@
 "use client";
 
 import * as Ably from "ably";
-import Board from "./Board";
+import Board from "../../../components/Board";
 import {
   AblyProvider,
   ChannelProvider,
