@@ -86,8 +86,8 @@ export default function Board({
   }, [selectedPiece]);
 
   return (
-    <div>
-      <div className="grid grid-cols-3 grid-rows-3 aspect-square">
+    <div className={`sm:flex sm:justify-center sm:items-stretch`}>
+      <div className="grid grid-cols-3 grid-rows-3 aspect-square sm:w-xl">
         {boardState.map((cell, index) => (
           <div
             onClick={() => selectPiece(index)}
@@ -106,12 +106,12 @@ export default function Board({
           </div>
         ))}
       </div>
-      <div className="flex justify-around mt-4">
+      <div className="flex justify-around mt-4 sm:w-xl sm:flex-col sm:mt-0 sm:flex-0 sm:ml-4 sm:mr-4">
         {myColor &&
           pieceList.map((piece, index) => (
             <div
               onClick={() => addPiece(`${piece.repersentationChar}`)}
-              className={`bg-green-300 w-1/4 flex justify-center border-2 rounded-sm aspect-square hover:border-blue-400 ${
+              className={`sm:w-40 bg-green-300 w-1/4 flex justify-center border-2 rounded-sm aspect-square hover:border-blue-400 ${
                 typeof selectedPiece == "string" &&
                 selectedPiece == piece.repersentationChar
                   ? "border-4 border-yellow-400"
