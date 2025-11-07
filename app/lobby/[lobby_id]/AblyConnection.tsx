@@ -7,7 +7,7 @@ import { use, useEffect, useState } from "react";
 import Board from "./Board";
 import { GameMessageType } from "./messageTypes";
 import { staticPieces } from "./StaticPieces";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
 
 type AblyConnectionProps = {
   lobby_id: string;
@@ -25,6 +25,7 @@ export default function AblyConnection({
   const [messages, setMessages] = useState<Ably.Message[]>([]);
 
   const [localRoom, setLocalRoom] = useState<Room>(room);
+  const [coppied, setCoppied] = useState(false);
 
   const [turn, setTurn] = useState<"w" | "b" | null>(null);
   const [conType, setConType] = useState<"creator" | "occupant" | null>(null);
@@ -62,6 +63,16 @@ export default function AblyConnection({
     console.log("Connected to Ably!");
   });
 
+  function handleCopy() {
+    navigator.clipboard.writeText(
+      `${window.location.origin}/join-game?lobby=${lobby_id}`
+    );
+    setCoppied(true);
+    setTimeout(() => {
+      setCoppied(false);
+    }, 1000);
+  }
+
   function onMessageReceived(message: Ably.Message) {
     const parsed = JSON.parse(message.data as string) as GameMessageType;
     if ("claimRoom" in parsed && parsed.claimRoom == username) {
@@ -91,6 +102,12 @@ export default function AblyConnection({
       return;
     }
     if ("playMove" in parsed) {
+      if (
+        message.connectionId !== localRoom.roomCreator &&
+        message.connectionId !== localRoom.roomOccupant
+      ) {
+        return;
+      }
       const turn = message.connectionId === localRoom.roomCreator ? "b" : "w";
       setBoardState(parsed.playMove);
       setTurn(turn);
@@ -110,7 +127,10 @@ export default function AblyConnection({
   });
 
   const boardEnabled =
-    (turn == null && conType != null) ||
+    (turn == null &&
+      conType != null &&
+      localRoom.roomCreator != null &&
+      localRoom.roomOccupant != null) ||
     (turn == "w" && conType == "creator") ||
     (turn == "b" && conType == "occupant");
 
@@ -127,6 +147,24 @@ export default function AblyConnection({
           {localRoom.roomOccupantName || "Waiting for player..."}{" "}
         </h3>
       </div>
+      <h4
+        onClick={handleCopy}
+        className={`flex align-middle justify-center gap-2 hover:text-blue-200 cursor-pointer transition-colors sm:absolute sm:top-[75px] sm:left-[calc(50vw-43px)] ${
+          coppied ? "text-green-300" : ""
+        }`}
+      >
+        {coppied ? (
+          <>
+            Copied
+            <Check />
+          </>
+        ) : (
+          <>
+            Get link
+            <Copy />
+          </>
+        )}
+      </h4>
       <Board
         boardState={boardState}
         setBoardState={setBoardState}

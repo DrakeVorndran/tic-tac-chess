@@ -22,16 +22,25 @@ export default function NewGameForm({
         onCreate(creator);
       }}
     >
-      <label htmlFor="creator">Your Name:</label>
-      <input
-        type="text"
-        id="creator"
-        name="creator"
-        value={creator}
-        onChange={(e) => setCreator(e.target.value)}
-        required
-      />
-      <button type="submit">Create Game</button>
+      <div className="flex flex-col gap-2 mb-4 items-center *:flex *:gap-2 *:justify-between *:w-full">
+        <div>
+          <label htmlFor="name">Enter your name:</label>
+          <input
+            className="outline-1 rounded-md"
+            id="name"
+            value={creator}
+            onChange={(e) => setCreator(e.target.value)}
+          />
+        </div>
+        <div>
+          <button
+            type="submit"
+            className="outline-2 mt-2 rounded-md m-auto p-1 pr-2 pl-2 cursor-pointer bg-blue-500 text-white hover:bg-blue-600"
+          >
+            Create Game
+          </button>
+        </div>
+      </div>
     </form>
   );
 }

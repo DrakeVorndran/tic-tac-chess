@@ -15,10 +15,9 @@ export default async function NewGamePage() {
     redirect(`/lobby/${room.roomToken}`);
   }
   return (
-    <div>
-      <h1>Create a new game</h1>
+    <div className="flex flex-col gap-4 items-center">
+      <h1 className={"text-2xl"}>Create Game</h1>
       <NewGameForm onCreate={handleCreateGame} />
-      <Link href="/join-game">Join an existing game</Link>
     </div>
   );
 }

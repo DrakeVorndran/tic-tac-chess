@@ -1,18 +1,20 @@
 import prisma from "@/lib/prisma";
 import Link from "next/link";
-import RoomDisplay from "./RoomDisplay";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import Form from "./Form";
 export default async function JoinGamePage() {
-  async function getAllRooms() {
-    "use server";
-    const allRooms = await prisma.room.findMany();
-    return allRooms;
-  }
-
-  async function handleJoinRoom(roomId: string, username: string) {
+  async function handleJoinRoom(username: string, roomId: string) {
     "use server";
     // Logic to join the room can be added here
+
+    const existingRoom = await prisma.room.findUnique({
+      where: { roomToken: roomId },
+    });
+    console.log(existingRoom, roomId);
+    if (!existingRoom) {
+      return "Room not found";
+    }
     const result = await prisma.room.update({
       where: { roomToken: roomId },
       data: { roomOccupantName: username },
@@ -20,14 +22,9 @@ export default async function JoinGamePage() {
     redirect(`/lobby/${roomId}`);
   }
   return (
-    <div>
-      <h1>Join Game Page</h1>
-      <p>All games:</p>
-      <Suspense fallback={<div>Loading rooms...</div>}>
-        <RoomDisplay getAllRooms={getAllRooms} joinRoom={handleJoinRoom} />
-      </Suspense>
-
-      <Link href="/new-game">Make a game</Link>
+    <div className={"flex flex-col gap-4 items-center"}>
+      <h1 className={"text-2xl"}>Join Game</h1>
+      <Form onSubmit={handleJoinRoom} />
     </div>
   );
 }
