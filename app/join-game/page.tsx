@@ -4,8 +4,11 @@ import RoomDisplay from "./RoomDisplay";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 export default async function JoinGamePage() {
-  const allRooms = await prisma.room.findMany();
-  console.log(allRooms);
+  async function getAllRooms() {
+    "use server";
+    const allRooms = await prisma.room.findMany();
+    return allRooms;
+  }
 
   async function handleJoinRoom(roomId: string, username: string) {
     "use server";
@@ -21,7 +24,7 @@ export default async function JoinGamePage() {
       <h1>Join Game Page</h1>
       <p>All games:</p>
       <Suspense fallback={<div>Loading rooms...</div>}>
-        <RoomDisplay rooms={allRooms} joinRoom={handleJoinRoom} />
+        <RoomDisplay getAllRooms={getAllRooms} joinRoom={handleJoinRoom} />
       </Suspense>
 
       <Link href="/new-game">Make a game</Link>

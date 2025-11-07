@@ -2,17 +2,29 @@
 
 import { Room } from "@prisma/client";
 import SingleRoom from "./SingleRoom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NameSelector from "./NameSelector";
 
 export default function RoomDisplay({
-  rooms,
+  getAllRooms,
   joinRoom,
 }: {
-  rooms: Room[];
+  getAllRooms: () => Promise<Room[]>;
   joinRoom: (room: string, username: string) => void;
 }) {
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const fetched = await getAllRooms();
+      if (mounted) setRooms(fetched);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
   return (
     <div>
       {selectedRoom == null ? (
