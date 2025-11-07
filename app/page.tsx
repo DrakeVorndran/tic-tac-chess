@@ -10,7 +10,7 @@ export default function Home() {
         <div className="flex flex-col items-center gap-2 mt-4">
           <Link
             className="bg-blue-500 hover:bg-blue-600 p-1 pl-2 pr-2 border rounded-md"
-            href="/create-game"
+            href="/new-game"
           >
             Start a new game
           </Link>

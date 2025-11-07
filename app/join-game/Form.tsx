@@ -37,7 +37,7 @@ export default function Form({
         <div>
           <label htmlFor="name">Enter your name:</label>
           <input
-            className="outline-1 rounded-md"
+            className="outline-1 rounded-md p-1"
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -47,7 +47,7 @@ export default function Form({
           <label htmlFor="lobby">Lobby ID:</label>
           <input
             id="lobby"
-            className="outline-1 rounded-md"
+            className="outline-1 rounded-md p-1"
             value={lobby}
             onChange={(e) => setLobby(e.target.value)}
           />

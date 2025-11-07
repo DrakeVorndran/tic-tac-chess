@@ -26,7 +26,7 @@ export default function NewGameForm({
         <div>
           <label htmlFor="name">Enter your name:</label>
           <input
-            className="outline-1 rounded-md"
+            className="outline-1 rounded-md p-1"
             id="name"
             value={creator}
             onChange={(e) => setCreator(e.target.value)}

@@ -4,11 +4,11 @@ export default function FakeForm() {
       <div className="flex flex-col gap-2 mb-4 items-center *:flex *:gap-2 *:justify-between *:w-full">
         <div>
           <label htmlFor="name">Enter your name:</label>
-          <input className="outline-1 rounded-md" id="name" />
+          <input className="outline-1 rounded-md p-1" id="name" />
         </div>
         <div>
           <label htmlFor="lobby">Lobby ID:</label>
-          <input id="lobby" className="outline-1 rounded-md" />
+          <input id="lobby" className="outline-1 rounded-md p-1" />
         </div>
         <p className="text-red-500"> </p>
         <div>
