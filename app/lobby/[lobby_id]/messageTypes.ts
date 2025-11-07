@@ -8,5 +8,6 @@ export type GameMessageType =
       joinRoom: string;
     }
   | {
-      playMove: string;
+      // Updated to represent the entire board state
+      playMove: string[];
     };

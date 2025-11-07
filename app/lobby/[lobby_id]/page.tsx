@@ -22,7 +22,6 @@ export default async function LobbyPage({
   }
   return (
     <div>
-      <h1>Lobby Page: {lobby_id}</h1>
       {room && <Game lobby_id={lobby_id} room={room} updateRoom={updateRoom} />}
     </div>
   );

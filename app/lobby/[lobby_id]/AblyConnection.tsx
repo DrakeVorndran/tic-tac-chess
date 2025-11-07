@@ -6,6 +6,8 @@ import { useChannel, useConnectionStateListener } from "ably/react";
 import { use, useEffect, useState } from "react";
 import Board from "./Board";
 import { GameMessageType } from "./messageTypes";
+import { staticPieces } from "./StaticPieces";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 type AblyConnectionProps = {
   lobby_id: string;
@@ -23,6 +25,20 @@ export default function AblyConnection({
   const [messages, setMessages] = useState<Ably.Message[]>([]);
 
   const [localRoom, setLocalRoom] = useState<Room>(room);
+
+  const [turn, setTurn] = useState<"w" | "b" | null>(null);
+  const [conType, setConType] = useState<"creator" | "occupant" | null>(null);
+  const [boardState, setBoardState] = useState([
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+  ]);
 
   useEffect(() => {
     console.log(room);
@@ -47,26 +63,37 @@ export default function AblyConnection({
   });
 
   function onMessageReceived(message: Ably.Message) {
-    const parsed = JSON.parse(message.data as string) as Object;
+    const parsed = JSON.parse(message.data as string) as GameMessageType;
     if ("claimRoom" in parsed && parsed.claimRoom == username) {
       updateRoom({ roomCreator: message.connectionId });
       setLocalRoom((prev) => ({
         ...prev,
         roomCreator: message.connectionId || null,
       }));
+      setConType("creator");
       return;
     }
-    if ("joinRoom" in parsed && parsed.joinRoom == username) {
-      updateRoom({
-        roomOccupant: message.connectionId,
-        roomOccupantName: username,
-      });
+    if ("joinRoom" in parsed) {
+      if (parsed.joinRoom == username) {
+        console.log("firing here");
+        updateRoom({
+          roomOccupant: message.connectionId,
+          roomOccupantName: username,
+        });
+        setConType("occupant");
+      }
+      console.log("firing here 2");
       setLocalRoom((prev) => ({
         ...prev,
         roomOccupant: message.connectionId || null,
-        roomOccupantName: username,
+        roomOccupantName: parsed.joinRoom,
       }));
       return;
+    }
+    if ("playMove" in parsed) {
+      const turn = message.connectionId === localRoom.roomCreator ? "b" : "w";
+      setBoardState(parsed.playMove);
+      setTurn(turn);
     }
   }
 
@@ -81,13 +108,36 @@ export default function AblyConnection({
     setMessages((previousMessages) => [...previousMessages, message]);
     onMessageReceived(message);
   });
+
+  const boardEnabled =
+    (turn == null && conType != null) ||
+    (turn == "w" && conType == "creator") ||
+    (turn == "b" && conType == "occupant");
+
   return (
     // Publish a message with the name 'first' and the contents 'Here is my first message!' when the 'Publish' button is clicked
     <div>
-      <Board fireMessage={fireMessage} />
-      {messages.map((message) => {
-        return <p key={message.id}>{message.data}</p>;
-      })}
+      <div className="flex justify-between mb-4 mr-2 ml-2 text-xl">
+        <h3 className="flex align-middle">
+          White: {localRoom.roomCreatorName || "Waiting for player..."}{" "}
+          {turn == "w" && <ArrowLeft color={"red"} />}
+        </h3>
+        <h3 className="flex align-middle">
+          {turn == "b" && <ArrowRight color={"red"} />} Black:{" "}
+          {localRoom.roomOccupantName || "Waiting for player..."}{" "}
+        </h3>
+      </div>
+      <Board
+        boardState={boardState}
+        setBoardState={setBoardState}
+        fireMessage={fireMessage}
+        pieceList={staticPieces}
+        turn={turn}
+        myColor={
+          conType == "creator" ? "w" : conType == "occupant" ? "b" : null
+        }
+        enabled={boardEnabled}
+      />
     </div>
   );
 }
