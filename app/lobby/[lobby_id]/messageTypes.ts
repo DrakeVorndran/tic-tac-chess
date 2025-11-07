@@ -10,4 +10,7 @@ export type GameMessageType =
   | {
       // Updated to represent the entire board state
       playMove: string[];
+    }
+  | {
+      reset: "w" | "b" | null;
     };

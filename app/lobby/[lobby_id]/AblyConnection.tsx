@@ -15,6 +15,7 @@ type AblyConnectionProps = {
   room: Room;
   updateRoom: (newData: Partial<Room>) => void;
 };
+const defaultBoardState = ["", "", "", "", "", "", "", "", ""];
 
 export default function AblyConnection({
   lobby_id,
@@ -24,22 +25,51 @@ export default function AblyConnection({
 }: AblyConnectionProps) {
   const [messages, setMessages] = useState<Ably.Message[]>([]);
 
-  const [localRoom, setLocalRoom] = useState<Room>(room);
+  const [localRoom, setLocalRoom] = useState<
+    Room & { whiteScore: number; blackScore: number }
+  >({ ...room, whiteScore: 0, blackScore: 0 });
   const [coppied, setCoppied] = useState(false);
 
   const [turn, setTurn] = useState<"w" | "b" | null>(null);
   const [conType, setConType] = useState<"creator" | "occupant" | null>(null);
-  const [boardState, setBoardState] = useState([
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-    "",
-  ]);
+  const [winner, setWinner] = useState<"w" | "b" | null>(null);
+  const [boardState, setBoardState] = useState([...defaultBoardState]);
+
+  useEffect(() => {
+    const toSearch = [
+      // Horizontal
+      [0, 1, 2],
+      [3, 4, 5],
+      [6, 7, 8],
+      // Vertical
+      [0, 3, 6],
+      [1, 4, 7],
+      [2, 5, 8],
+      // Diagonal
+      [0, 4, 8],
+      [2, 4, 6],
+    ];
+
+    toSearch.forEach((bracket) => {
+      const streaks = bracket.reduce(
+        (r, i) => {
+          const cell = boardState[i];
+          const color = cell.charAt(0);
+          if (color) {
+            return { ...r, [color]: r[color as "w" | "b"] + 1 };
+          }
+          return r;
+        },
+        { b: 0, w: 0 }
+      );
+      if (streaks.w == 3) {
+        setWinner("w");
+      }
+      if (streaks.b == 3) {
+        setWinner("b");
+      }
+    });
+  }, [boardState]);
 
   useEffect(() => {
     console.log(room);
@@ -112,10 +142,34 @@ export default function AblyConnection({
       setBoardState(parsed.playMove);
       setTurn(turn);
     }
+    if ("reset" in parsed) {
+      if (
+        message.connectionId !== localRoom.roomCreator &&
+        message.connectionId !== localRoom.roomOccupant
+      ) {
+        return;
+      }
+      if (parsed.reset == "b") {
+        setLocalRoom((prev) => ({ ...prev, blackScore: prev.blackScore + 1 }));
+      }
+      if (parsed.reset == "w") {
+        setLocalRoom((prev) => ({ ...prev, whiteScore: prev.whiteScore + 1 }));
+      }
+      setBoardState([...defaultBoardState]);
+      setWinner(null);
+      setTurn(null);
+    }
   }
 
   function fireMessage(message: GameMessageType) {
     channel.publish("game", JSON.stringify(message));
+  }
+
+  function handleReset() {
+    const resetMessage: GameMessageType = {
+      reset: winner,
+    };
+    fireMessage(resetMessage);
   }
 
   // Create a channel called 'get-started' and subscribe to all messages with the name 'first' using the useChannel hook
@@ -127,7 +181,8 @@ export default function AblyConnection({
   });
 
   const boardEnabled =
-    (turn == null &&
+    (winner == null &&
+      turn == null &&
       conType != null &&
       localRoom.roomCreator != null &&
       localRoom.roomOccupant != null) ||
@@ -140,11 +195,13 @@ export default function AblyConnection({
       <div className="flex justify-between mb-4 mr-2 ml-2 text-xl">
         <h3 className="flex align-middle">
           White: {localRoom.roomCreatorName || "Waiting for player..."}{" "}
+          {localRoom.whiteScore > 0 && `(${localRoom.whiteScore})`}
           {turn == "w" && <ArrowLeft color={"red"} />}
         </h3>
         <h3 className="flex align-middle">
           {turn == "b" && <ArrowRight color={"red"} />} Black:{" "}
           {localRoom.roomOccupantName || "Waiting for player..."}{" "}
+          {localRoom.blackScore > 0 && `(${localRoom.blackScore})`}
         </h3>
       </div>
       <h4
@@ -176,6 +233,22 @@ export default function AblyConnection({
         }
         enabled={boardEnabled}
       />
+      {winner && (
+        <div className="flex flex-col items-center justify-center gap-2">
+          <h2 className="text-2xl">
+            {winner == "w"
+              ? localRoom.roomCreatorName
+              : localRoom.roomOccupantName}{" "}
+            Wins!
+          </h2>
+          <button
+            onClick={handleReset}
+            className="border rounded-md p-1 pl-2 pr-2 bg-blue-500 hover:bg-blue-600 cursor-pointer"
+          >
+            Reset
+          </button>
+        </div>
+      )}
     </div>
   );
 }
