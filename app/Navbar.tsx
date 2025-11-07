@@ -4,7 +4,7 @@ export default function Navbar() {
   return (
     <nav className="w-full p-4 bg-gray-800 text-white flex flex-col justify-center items-center sm:flex-row sm:justify-between">
       <h1 className="text-xl font-bold">Chess Tac Toe</h1>
-      <div className="flex gap-4 mt-2">
+      <div className="flex gap-4 mt-2 sm:mt-0">
         <Link
           className="text-xl font-bold border-b-2 hover:text-blue-200 cursor-pointer"
           href="/new-game"

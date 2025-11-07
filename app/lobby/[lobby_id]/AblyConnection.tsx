@@ -149,7 +149,7 @@ export default function AblyConnection({
       </div>
       <h4
         onClick={handleCopy}
-        className={`flex align-middle justify-center gap-2 hover:text-blue-200 cursor-pointer transition-colors sm:absolute sm:top-[75px] sm:left-[calc(50vw-43px)] ${
+        className={`flex align-middle justify-center gap-2 hover:text-blue-200 cursor-pointer transition-colors sm:absolute sm:top-[66px] sm:left-[calc(50vw-43px)] ${
           coppied ? "text-green-300" : ""
         }`}
       >
