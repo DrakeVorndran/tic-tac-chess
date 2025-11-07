@@ -2,6 +2,7 @@ import prisma from "@/lib/prisma";
 import Link from "next/link";
 import RoomDisplay from "./RoomDisplay";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 export default async function JoinGamePage() {
   const allRooms = await prisma.room.findMany();
   console.log(allRooms);
@@ -19,7 +20,9 @@ export default async function JoinGamePage() {
     <div>
       <h1>Join Game Page</h1>
       <p>All games:</p>
-      <RoomDisplay rooms={allRooms} joinRoom={handleJoinRoom} />
+      <Suspense>
+        <RoomDisplay rooms={allRooms} joinRoom={handleJoinRoom} />
+      </Suspense>
 
       <Link href="/new-game">Make a game</Link>
     </div>
