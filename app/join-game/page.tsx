@@ -20,7 +20,7 @@ export default async function JoinGamePage() {
     <div>
       <h1>Join Game Page</h1>
       <p>All games:</p>
-      <Suspense>
+      <Suspense fallback={<div>Loading rooms...</div>}>
         <RoomDisplay rooms={allRooms} joinRoom={handleJoinRoom} />
       </Suspense>
 
