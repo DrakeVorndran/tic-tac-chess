@@ -62,7 +62,7 @@ export default function SandboxGame() {
       }));
       setBoardState([...defaultBoardState]);
       setWinner(null);
-      setTurn(null);
+      setTurn("w");
     }
   }
   async function handleReset() {
