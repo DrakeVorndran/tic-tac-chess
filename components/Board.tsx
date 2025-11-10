@@ -13,6 +13,7 @@ type BoardProps = {
   myColor?: "w" | "b" | null;
   boardState: string[];
   setBoardState: (newState: string[]) => void;
+  inverted?: boolean;
 };
 
 export default function Board({
@@ -23,6 +24,7 @@ export default function Board({
   myColor,
   boardState,
   setBoardState,
+  inverted,
 }: BoardProps) {
   const [selectedPiece, setSelectedPiece] = useState<number | string | null>(
     null
@@ -76,31 +78,53 @@ export default function Board({
       setAvailableMoves(search);
     } else {
       if (myColor == "w") {
-        const search = [0, 1, 2].filter((index) => boardState[index] === "");
+        const search = [6, 7, 8].filter((index) => boardState[index] === "");
         setAvailableMoves(search);
       } else {
-        const search = [6, 7, 8].filter((index) => boardState[index] === "");
+        const search = [0, 1, 2].filter((index) => boardState[index] === "");
         setAvailableMoves(search);
       }
     }
   }, [selectedPiece]);
 
+  function getIndex(boardIndex: number) {
+    if (inverted) {
+      const row = boardIndex % 3;
+      const col = Math.floor(boardIndex / 3);
+      return row + -3 * (col - 2);
+    }
+
+    return boardIndex;
+  }
+
+  const invertedBoard = [
+    ...boardState.slice(6, 9),
+    ...boardState.slice(3, 6),
+    ...boardState.slice(0, 3),
+  ];
+
+  console.log(invertedBoard);
+
   return (
     <div className={`sm:flex sm:justify-center sm:items-stretch`}>
       <div className="grid grid-cols-3 grid-rows-3 aspect-square sm:w-xl">
-        {boardState.map((cell, index) => (
+        {(inverted ? invertedBoard : boardState).map((cell, index) => (
           <div
-            onClick={() => selectPiece(index)}
+            onClick={() => selectPiece(getIndex(index))}
             className={`box-border flex justify-center items-center text-black  hover:border-red-400 hover:border-2 ${
-              avalibleMoves.includes(index)
-                ? index % 2
+              avalibleMoves.includes(getIndex(index))
+                ? getIndex(index) % 2
                   ? "bg-amber-200"
                   : "bg-amber-100"
-                : index % 2
+                : getIndex(index) % 2
                 ? "bg-green-400"
                 : "bg-green-200 "
-            } ${selectedPiece === index ? "border-4 border-yellow-400" : ""}`}
-            key={index}
+            } ${
+              selectedPiece === getIndex(index)
+                ? "border-4 border-yellow-400"
+                : ""
+            }`}
+            key={getIndex(index)}
           >
             <Piece pieceList={pieceList} repr={cell} />
           </div>

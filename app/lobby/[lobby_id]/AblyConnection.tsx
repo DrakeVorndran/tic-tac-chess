@@ -231,6 +231,7 @@ export default function AblyConnection({
         myColor={
           conType == "creator" ? "w" : conType == "occupant" ? "b" : null
         }
+        inverted={conType == "occupant" ? true : false}
         enabled={boardEnabled}
       />
       {winner && (
