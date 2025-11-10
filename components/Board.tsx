@@ -103,8 +103,6 @@ export default function Board({
     ...boardState.slice(0, 3),
   ];
 
-  console.log(invertedBoard);
-
   return (
     <div className={`sm:flex sm:justify-center sm:items-stretch`}>
       <div className="grid grid-cols-3 grid-rows-3 aspect-square sm:w-xl">
