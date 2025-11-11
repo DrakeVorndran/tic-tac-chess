@@ -196,13 +196,13 @@ export default function AblyConnection({
   });
 
   const boardEnabled =
-    (winner == null &&
-      turn == null &&
-      conType != null &&
-      localRoom.roomCreator != null &&
-      localRoom.roomOccupant != null) ||
-    (turn == "w" && conType == "creator") ||
-    (turn == "b" && conType == "occupant");
+    winner == null &&
+    conType != null &&
+    localRoom.roomCreator != null &&
+    localRoom.roomOccupant != null &&
+    (turn == null ||
+      (turn == "w" && conType == "creator") ||
+      (turn == "b" && conType == "occupant"));
 
   return (
     // Publish a message with the name 'first' and the contents 'Here is my first message!' when the 'Publish' button is clicked
