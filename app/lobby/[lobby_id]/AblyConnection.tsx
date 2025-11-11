@@ -8,6 +8,7 @@ import Board from "../../../components/Board";
 import { GameMessageType } from "../../../components/messageTypes";
 import { staticPieces } from "../../../components/StaticPieces";
 import { ArrowLeft, ArrowRight, Check, Copy } from "lucide-react";
+import { personalGameId } from "@/components/types";
 
 type AblyConnectionProps = {
   lobby_id: string;
@@ -34,6 +35,10 @@ export default function AblyConnection({
   const [conType, setConType] = useState<"creator" | "occupant" | null>(null);
   const [winner, setWinner] = useState<"w" | "b" | null>(null);
   const [boardState, setBoardState] = useState([...defaultBoardState]);
+
+  const [currentGamePersonalId, setCurrentGamePersonalId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     const toSearch = [
@@ -72,20 +77,34 @@ export default function AblyConnection({
   }, [boardState]);
 
   useEffect(() => {
-    console.log(room);
-    if (room.roomCreator == null && room.roomCreatorName == username) {
-      const message: GameMessageType = {
-        claimRoom: username,
-      };
-      channel.publish("game", JSON.stringify(message));
-      return;
-    }
-    if (room.roomOccupant == null && room.roomOccupantName == username) {
-      const message: GameMessageType = {
-        joinRoom: username,
-      };
-      channel.publish("game", JSON.stringify(message));
-      return;
+    const stringIds = localStorage.getItem("personalGameIds");
+    const personalGameIds: personalGameId[] = stringIds
+      ? JSON.parse(stringIds)
+      : [];
+    const currentGameIdObj = personalGameIds.filter(
+      (game) => game.lobbyId == lobby_id
+    );
+
+    if (currentGameIdObj.length == 1) {
+      setCurrentGamePersonalId(currentGameIdObj[0].personalUuid);
+      if (currentGameIdObj[0].personalUuid == room.roomCreator) {
+        setConType("creator");
+      }
+
+      if (
+        room.roomOccupant == null &&
+        room.roomOccupantName == username &&
+        currentGameIdObj[0].personalUuid != null
+      ) {
+        const message: GameMessageType = {
+          joinRoom: {
+            username: username,
+            personalId: currentGameIdObj[0].personalUuid,
+          },
+        };
+        channel.publish("game", JSON.stringify(message));
+        return;
+      }
     }
   }, []);
 
@@ -105,54 +124,47 @@ export default function AblyConnection({
 
   function onMessageReceived(message: Ably.Message) {
     const parsed = JSON.parse(message.data as string) as GameMessageType;
-    if ("claimRoom" in parsed && parsed.claimRoom == username) {
-      updateRoom({ roomCreator: message.connectionId });
-      setLocalRoom((prev) => ({
-        ...prev,
-        roomCreator: message.connectionId || null,
-      }));
-      setConType("creator");
-      return;
-    }
     if ("joinRoom" in parsed) {
-      if (parsed.joinRoom == username) {
-        console.log("firing here");
+      if (localRoom.roomOccupant != null) {
+        return;
+      }
+      if (parsed.joinRoom.personalId == currentGamePersonalId) {
         updateRoom({
-          roomOccupant: message.connectionId,
-          roomOccupantName: username,
+          roomOccupant: currentGamePersonalId,
+          roomOccupantName: parsed.joinRoom.username,
         });
         setConType("occupant");
       }
-      console.log("firing here 2");
       setLocalRoom((prev) => ({
         ...prev,
-        roomOccupant: message.connectionId || null,
-        roomOccupantName: parsed.joinRoom,
+        roomOccupant: parsed.joinRoom.personalId,
+        roomOccupantName: parsed.joinRoom.username,
       }));
       return;
     }
     if ("playMove" in parsed) {
       if (
-        message.connectionId !== localRoom.roomCreator &&
-        message.connectionId !== localRoom.roomOccupant
+        parsed.playMove.personalId !== localRoom.roomCreator &&
+        parsed.playMove.personalId !== localRoom.roomOccupant
       ) {
         return;
       }
-      const turn = message.connectionId === localRoom.roomCreator ? "b" : "w";
-      setBoardState(parsed.playMove);
+      const turn =
+        parsed.playMove.personalId === localRoom.roomCreator ? "b" : "w";
+      setBoardState(parsed.playMove.board);
       setTurn(turn);
     }
     if ("reset" in parsed) {
       if (
-        message.connectionId !== localRoom.roomCreator &&
-        message.connectionId !== localRoom.roomOccupant
+        parsed.reset.personalId !== localRoom.roomCreator &&
+        parsed.reset.personalId !== localRoom.roomOccupant
       ) {
         return;
       }
-      if (parsed.reset == "b") {
+      if (parsed.reset.winner == "b") {
         setLocalRoom((prev) => ({ ...prev, blackScore: prev.blackScore + 1 }));
       }
-      if (parsed.reset == "w") {
+      if (parsed.reset.winner == "w") {
         setLocalRoom((prev) => ({ ...prev, whiteScore: prev.whiteScore + 1 }));
       }
       setBoardState([...defaultBoardState]);
@@ -166,8 +178,11 @@ export default function AblyConnection({
   }
 
   function handleReset() {
+    if (currentGamePersonalId == null) {
+      return;
+    }
     const resetMessage: GameMessageType = {
-      reset: winner,
+      reset: { winner: winner, personalId: currentGamePersonalId },
     };
     fireMessage(resetMessage);
   }
@@ -223,6 +238,7 @@ export default function AblyConnection({
         )}
       </h4>
       <Board
+        personalId={currentGamePersonalId}
         boardState={boardState}
         setBoardState={setBoardState}
         fireMessage={fireMessage}

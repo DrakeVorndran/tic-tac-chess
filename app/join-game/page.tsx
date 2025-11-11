@@ -20,7 +20,7 @@ export default async function JoinGamePage() {
       where: { roomToken: roomId },
       data: { roomOccupantName: username },
     });
-    redirect(`/lobby/${roomId}`);
+    return result;
   }
   return (
     <div className={"flex flex-col gap-4 items-center"}>

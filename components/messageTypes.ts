@@ -1,16 +1,12 @@
 export type GameMessageType =
   | {
-      // Message sent to claim room ownership
-      claimRoom: string;
-    }
-  | {
       // Message sent to join the room
-      joinRoom: string;
+      joinRoom: { username: string; personalId: string };
     }
   | {
       // Updated to represent the entire board state
-      playMove: string[];
+      playMove: { board: string[]; personalId: string };
     }
   | {
-      reset: "w" | "b" | null;
+      reset: { winner: "w" | "b" | null; personalId: string };
     };

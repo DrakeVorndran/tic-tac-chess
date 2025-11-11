@@ -14,6 +14,7 @@ type BoardProps = {
   boardState: string[];
   setBoardState: (newState: string[]) => void;
   inverted?: boolean;
+  personalId?: string | null;
 };
 
 export default function Board({
@@ -25,6 +26,7 @@ export default function Board({
   boardState,
   setBoardState,
   inverted,
+  personalId,
 }: BoardProps) {
   const [selectedPiece, setSelectedPiece] = useState<number | string | null>(
     null
@@ -33,7 +35,12 @@ export default function Board({
   const [avalibleMoves, setAvailableMoves] = useState<number[]>([]);
 
   function selectPiece(square: number) {
-    if (!enabled || (turn != null && turn != myColor)) return;
+    if (
+      !enabled ||
+      personalId == undefined ||
+      (turn != null && turn != myColor)
+    )
+      return;
 
     if (selectedPiece != null && avalibleMoves.includes(square)) {
       if (avalibleMoves.includes(square)) {
@@ -45,7 +52,7 @@ export default function Board({
           newBoardState[selectedPiece] = "";
         }
         fireMessage({
-          playMove: newBoardState,
+          playMove: { board: newBoardState, personalId: personalId },
         });
       }
       setSelectedPiece(null);
