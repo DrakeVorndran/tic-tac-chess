@@ -70,12 +70,203 @@ export default function Board({
       const repr = boardState[selectedPiece].charAt(1);
       const piece =
         pieceList.find((p) => p.repersentationChar === repr) || null;
-
+      if (piece == null) {
+        setAvailableMoves([]);
+        return;
+      }
       const search = [0, 1, 2, 3, 4, 5, 6, 7, 8].filter(
         (index) =>
           boardState[index] === "" || boardState[index].charAt(0) !== myColor
       );
-      setAvailableMoves(search);
+
+      const row = selectedPiece % 3;
+      const col = Math.floor(selectedPiece / 3);
+
+      function getPiece(row: number, col: number) {
+        return boardState[getIndex(row, col)];
+      }
+      function getIndex(row: number, col: number) {
+        return row + col * 3;
+      }
+      const possibleMoves: number[] = [];
+      if ("moveDirections" in piece) {
+        piece.moveDirections?.forEach((dir) => {
+          let testRow = row;
+          let testCol = col;
+          let pieceFound = false;
+          switch (dir) {
+            case "e":
+              testRow = row + 1;
+              testCol = col;
+              pieceFound = false;
+              while (testRow < 3 && !pieceFound) {
+                const testPiece = getPiece(testRow, testCol);
+                if (testPiece == "") {
+                  possibleMoves.push(getIndex(testRow, testCol));
+                } else if (testPiece.charAt(0) == myColor) {
+                  pieceFound = true;
+                } else {
+                  pieceFound = true;
+                  possibleMoves.push(getIndex(testRow, testCol));
+                }
+                testRow++;
+              }
+              break;
+
+            case "w":
+              testRow = row - 1;
+              testCol = col;
+              pieceFound = false;
+              while (testRow > -1 && !pieceFound) {
+                const testPiece = getPiece(testRow, testCol);
+                if (testPiece == "") {
+                  possibleMoves.push(getIndex(testRow, testCol));
+                } else if (testPiece.charAt(0) == myColor) {
+                  pieceFound = true;
+                } else {
+                  pieceFound = true;
+                  possibleMoves.push(getIndex(testRow, testCol));
+                }
+                testRow--;
+              }
+              break;
+
+            case "n":
+              testRow = row;
+              testCol = col + 1;
+              pieceFound = false;
+              while (testCol < 3 && !pieceFound) {
+                const testPiece = getPiece(testRow, testCol);
+                if (testPiece == "") {
+                  possibleMoves.push(getIndex(testRow, testCol));
+                } else if (testPiece.charAt(0) == myColor) {
+                  pieceFound = true;
+                } else {
+                  pieceFound = true;
+                  possibleMoves.push(getIndex(testRow, testCol));
+                }
+                testCol++;
+              }
+              break;
+
+            case "s":
+              testRow = row;
+              testCol = col - 1;
+              pieceFound = false;
+              while (testCol > -1 && !pieceFound) {
+                const testPiece = getPiece(testRow, testCol);
+                if (testPiece == "") {
+                  possibleMoves.push(getIndex(testRow, testCol));
+                } else if (testPiece.charAt(0) == myColor) {
+                  pieceFound = true;
+                } else {
+                  pieceFound = true;
+                  possibleMoves.push(getIndex(testRow, testCol));
+                }
+                testCol--;
+              }
+              break;
+
+            case "ne":
+              testRow = row + 1;
+              testCol = col + 1;
+              pieceFound = false;
+              while (testRow < 3 && testCol < 3 && !pieceFound) {
+                const testPiece = getPiece(testRow, testCol);
+                if (testPiece == "") {
+                  possibleMoves.push(getIndex(testRow, testCol));
+                } else if (testPiece.charAt(0) == myColor) {
+                  pieceFound = true;
+                } else {
+                  pieceFound = true;
+                  possibleMoves.push(getIndex(testRow, testCol));
+                }
+                testRow++;
+                testCol++;
+              }
+              break;
+
+            case "nw":
+              testRow = row - 1;
+              testCol = col + 1;
+              pieceFound = false;
+              while (testRow > -1 && testCol < 3 && !pieceFound) {
+                const testPiece = getPiece(testRow, testCol);
+                if (testPiece == "") {
+                  possibleMoves.push(getIndex(testRow, testCol));
+                } else if (testPiece.charAt(0) == myColor) {
+                  pieceFound = true;
+                } else {
+                  pieceFound = true;
+                  possibleMoves.push(getIndex(testRow, testCol));
+                }
+                testRow--;
+                testCol++;
+              }
+              break;
+
+            case "sw":
+              testRow = row - 1;
+              testCol = col - 1;
+              pieceFound = false;
+              while (testRow > -1 && testCol > -1 && !pieceFound) {
+                const testPiece = getPiece(testRow, testCol);
+                if (testPiece == "") {
+                  possibleMoves.push(getIndex(testRow, testCol));
+                } else if (testPiece.charAt(0) == myColor) {
+                  pieceFound = true;
+                } else {
+                  pieceFound = true;
+                  possibleMoves.push(getIndex(testRow, testCol));
+                }
+                testRow--;
+                testCol--;
+              }
+              break;
+
+            case "se":
+              testRow = row + 1;
+              testCol = col - 1;
+              pieceFound = false;
+              while (testRow < 3 && testCol > -1 && !pieceFound) {
+                const testPiece = getPiece(testRow, testCol);
+                if (testPiece == "") {
+                  possibleMoves.push(getIndex(testRow, testCol));
+                } else if (testPiece.charAt(0) == myColor) {
+                  pieceFound = true;
+                } else {
+                  pieceFound = true;
+                  possibleMoves.push(getIndex(testRow, testCol));
+                }
+                testRow++;
+                testCol--;
+              }
+              break;
+          }
+        });
+      }
+
+      if (piece.moveList != undefined) {
+        piece.moveList.map((rowList, gridY) => {
+          rowList.map((validBool, gridX) => {
+            if (!validBool) {
+              return;
+            }
+
+            const realX = gridX - 2 + row;
+            const realY = gridY - 2 + col;
+            if (realX > 2 || realX < 0 || realY > 2 || realY < 0) {
+              return;
+            }
+            const testPiece = getPiece(realX, realY);
+            if (testPiece == "" || testPiece.charAt(0) != myColor) {
+              possibleMoves.push(getIndex(realX, realY));
+            }
+          });
+        });
+      }
+
+      setAvailableMoves(possibleMoves);
     } else {
       if (myColor == "w") {
         const search = [6, 7, 8].filter((index) => boardState[index] === "");
