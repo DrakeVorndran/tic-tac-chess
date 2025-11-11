@@ -52,13 +52,14 @@ export default function SandboxGame() {
 
   async function fireMessage(message: GameMessageType) {
     if ("playMove" in message) {
-      setBoardState(message.playMove);
+      setBoardState(message.playMove.board);
       setTurn(turn == "w" ? "b" : "w");
     }
     if ("reset" in message) {
       setScores((prev) => ({
         ...prev,
-        [message.reset as "a" | "b"]: prev[message.reset as "w" | "b"] + 1,
+        [message.reset.winner as "a" | "b"]:
+          prev[message.reset.winner as "w" | "b"] + 1,
       }));
       setBoardState([...defaultBoardState]);
       setWinner(null);
@@ -66,7 +67,7 @@ export default function SandboxGame() {
     }
   }
   async function handleReset() {
-    fireMessage({ reset: winner });
+    fireMessage({ reset: { winner: winner, personalId: "" } });
   }
 
   return (
@@ -83,6 +84,7 @@ export default function SandboxGame() {
       </div>
 
       <Board
+        personalId={"sandbox"}
         boardState={boardState}
         setBoardState={setBoardState}
         fireMessage={fireMessage}

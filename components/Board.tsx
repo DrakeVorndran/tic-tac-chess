@@ -51,6 +51,7 @@ export default function Board({
           newBoardState[square] = newBoardState[selectedPiece];
           newBoardState[selectedPiece] = "";
         }
+        console.log("trying to fire");
         fireMessage({
           playMove: { board: newBoardState, personalId: personalId },
         });
