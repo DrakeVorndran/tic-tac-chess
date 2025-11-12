@@ -14,6 +14,10 @@ export default function SandboxGame() {
   const [boardState, setBoardState] = useState([...defaultBoardState]);
   const [winner, setWinner] = useState<"w" | "b" | null>(null);
 
+  const [previousBoardStates, setPreviousBoardStates] = useState<string[][]>([
+    [],
+  ]);
+
   useEffect(() => {
     const toSearch = [
       // Horizontal
@@ -29,6 +33,8 @@ export default function SandboxGame() {
       [2, 4, 6],
     ];
 
+    let newWinner: "w" | "b" | null = null;
+
     toSearch.forEach((bracket) => {
       const streaks = bracket.reduce(
         (r, i) => {
@@ -42,16 +48,17 @@ export default function SandboxGame() {
         { b: 0, w: 0 }
       );
       if (streaks.w == 3) {
-        setWinner("w");
-      }
-      if (streaks.b == 3) {
-        setWinner("b");
+        newWinner = "w";
+      } else if (streaks.b == 3) {
+        newWinner = "b";
       }
     });
+    setWinner(newWinner);
   }, [boardState]);
 
   async function fireMessage(message: GameMessageType) {
     if ("playMove" in message) {
+      setPreviousBoardStates((prev) => [...prev, boardState]);
       setBoardState(message.playMove.board);
       setTurn(turn == "w" ? "b" : "w");
     }
@@ -64,8 +71,19 @@ export default function SandboxGame() {
       setBoardState([...defaultBoardState]);
       setWinner(null);
       setTurn("w");
+      setPreviousBoardStates([]);
     }
   }
+
+  async function handleUndo() {
+    if (previousBoardStates.length == 0) {
+      return;
+    }
+    setBoardState(previousBoardStates[previousBoardStates.length - 1]);
+    setPreviousBoardStates((prev) => prev.slice(0, prev.length - 1));
+    setTurn(turn == "w" ? "b" : "w");
+  }
+
   async function handleReset() {
     fireMessage({ reset: { winner: winner, personalId: "" } });
   }
@@ -77,12 +95,22 @@ export default function SandboxGame() {
           White {scores.w > 0 && `(${scores.w})`}
           {turn == "w" && <ArrowLeft color={"red"} />}
         </h3>
+
         <h3 className="flex align-middle">
           {turn == "b" && <ArrowRight color={"red"} />} Black:{" "}
           {scores.b > 0 && `(${scores.b})`}
         </h3>
       </div>
-
+      <div
+        className={`flex align-middle justify-center gap-2 mb-2 hover:text-blue-200 cursor-pointer transition-colors sm:absolute sm:top-[66px] sm:left-[calc(50vw-19px)]`}
+      >
+        <button
+          onClick={handleUndo}
+          className="border rounded-md pl-1 pr-1 text-md bg-blue-500 hover:bg-blue-600 cursor-pointer"
+        >
+          Undo
+        </button>
+      </div>
       <Board
         personalId={"sandbox"}
         boardState={boardState}
