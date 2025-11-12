@@ -13,7 +13,6 @@ export default async function LobbyPage({
 
   async function updateRoom(newData: Partial<Room>) {
     "use server";
-    console.log("UPDATING ROOM", newData);
     const result = await prisma.room.update({
       where: { roomToken: lobby_id },
       data: { ...newData, updatedAt: new Date() },

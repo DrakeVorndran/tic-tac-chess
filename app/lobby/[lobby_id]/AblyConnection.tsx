@@ -25,16 +25,17 @@ export default function AblyConnection({
   updateRoom,
 }: AblyConnectionProps) {
   const [messages, setMessages] = useState<Ably.Message[]>([]);
-
   const [localRoom, setLocalRoom] = useState<
     Room & { whiteScore: number; blackScore: number }
   >({ ...room, whiteScore: 0, blackScore: 0 });
   const [coppied, setCoppied] = useState(false);
 
-  const [turn, setTurn] = useState<"w" | "b" | null>(null);
+  const [turn, setTurn] = useState<"w" | "b" | null>(
+    room.turn == "" ? null : (room.turn as "w" | "b")
+  );
   const [conType, setConType] = useState<"creator" | "occupant" | null>(null);
   const [winner, setWinner] = useState<"w" | "b" | null>(null);
-  const [boardState, setBoardState] = useState([...defaultBoardState]);
+  const [boardState, setBoardState] = useState(room.currentBoard);
 
   const [currentGamePersonalId, setCurrentGamePersonalId] = useState<
     string | null
@@ -92,20 +93,27 @@ export default function AblyConnection({
       }
 
       if (
-        room.roomOccupant == null &&
         room.roomOccupantName == username &&
         currentGameIdObj[0].personalUuid != null
       ) {
-        const message: GameMessageType = {
-          joinRoom: {
-            username: username,
-            personalId: currentGameIdObj[0].personalUuid,
-          },
-        };
-        channel.publish("game", JSON.stringify(message));
+        setConType("occupant");
+        if (room.roomOccupant == null) {
+          const message: GameMessageType = {
+            joinRoom: {
+              username: username,
+              personalId: currentGameIdObj[0].personalUuid,
+            },
+          };
+
+          channel.publish("game", JSON.stringify(message));
+        }
         return;
       }
     }
+  }, [username]);
+
+  useEffect(() => {
+    console.log(conType);
   }, []);
 
   useConnectionStateListener("connected", () => {
@@ -113,9 +121,15 @@ export default function AblyConnection({
   });
 
   function handleCopy() {
-    navigator.clipboard.writeText(
-      `${window.location.origin}/join-game?lobby=${lobby_id}`
-    );
+    if (localRoom.roomOccupant == null) {
+      navigator.clipboard.writeText(
+        `${window.location.origin}/join-game?lobby=${lobby_id}`
+      );
+    } else {
+      navigator.clipboard.writeText(
+        `${window.location.origin}/lobby/${lobby_id}`
+      );
+    }
     setCoppied(true);
     setTimeout(() => {
       setCoppied(false);
@@ -152,7 +166,13 @@ export default function AblyConnection({
       const turn =
         parsed.playMove.personalId === localRoom.roomCreator ? "b" : "w";
       setBoardState(parsed.playMove.board);
+      if (parsed.playMove.personalId == currentGamePersonalId) {
+      }
       setTurn(turn);
+      updateRoom({
+        currentBoard: parsed.playMove.board,
+        turn: turn,
+      });
     }
     if ("reset" in parsed) {
       if (
@@ -232,7 +252,7 @@ export default function AblyConnection({
           </>
         ) : (
           <>
-            Get link
+            Invite {localRoom.roomOccupant == null ? "Opponent" : "Spectators"}
             <Copy />
           </>
         )}

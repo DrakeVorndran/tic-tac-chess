@@ -16,4 +16,6 @@ model Room {
     roomOccupant     String?
     roomOccupantName String?
     roomToken        String   @unique
+    currentBoard     String[]
+    turn             String
 }

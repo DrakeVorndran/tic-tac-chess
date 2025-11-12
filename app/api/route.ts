@@ -8,7 +8,7 @@ export const revalidate = 0;
 export async function GET(request: Request) {
   const client = new Ably.Rest(process.env.ABLY_API_KEY!);
   const tokenRequestData = await client.auth.createTokenRequest({
-    clientId: "ably-spaces-demo",
+    clientId: "chess-tac-toe-client",
   });
   return Response.json(tokenRequestData);
 }

@@ -38,14 +38,12 @@ export default function Game({ lobby_id, room, updateRoom }: GameProps) {
   return (
     <AblyProvider client={client}>
       <ChannelProvider channelName={lobby_id}>
-        {username && (
-          <AblyConnection
-            lobby_id={lobby_id}
-            username={username}
-            room={room}
-            updateRoom={updateRoom}
-          />
-        )}
+        <AblyConnection
+          lobby_id={lobby_id}
+          username={username}
+          room={room}
+          updateRoom={updateRoom}
+        />
       </ChannelProvider>
     </AblyProvider>
   );

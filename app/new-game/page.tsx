@@ -15,6 +15,8 @@ export default async function NewGamePage() {
         roomCreatorName: creator,
         roomCreator: personalGameUuid,
         roomToken: Math.random().toString(36).substring(2, 8),
+        currentBoard: ["", "", "", "", "", "", "", "", ""],
+        turn: "",
       },
     });
     return room;
