@@ -1,10 +1,6 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-<<<<<<< HEAD
 ## Created By a Nick
-=======
-## Created By a Ki
->>>>>>> d86d5cb6758bace492c09665a8bb54b7ae4f44ca
 
 ## Getting Started
 
